@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Thrust : MonoBehaviour {
+public class Thrust : MonoBehaviour
+{
 
     public float ThrustMain;
     public float ThrustVector;
@@ -25,7 +26,7 @@ public class Thrust : MonoBehaviour {
 	
 	void Update ()
     {
-
+        //print(Mathf.Abs(Quaternion.Angle(transform.rotation, Quaternion.Euler(0, 1, 0))));
     }
 
     public void ThrustAUX(float[] thrust)
@@ -39,11 +40,14 @@ public class Thrust : MonoBehaviour {
 
     private void OnCollisionEnter(Collision collision)
     {
-        if(KineticEnergy(rb) > 1000)
+        if (KineticEnergy(rb) > 1000)
         {
-            print(KineticEnergy(rb) + "dead");
+
         }
-        else { print(KineticEnergy(rb) + "success"); }
+        else
+        {
+
+        }
     }
 
     public static float KineticEnergy(Rigidbody rb)
