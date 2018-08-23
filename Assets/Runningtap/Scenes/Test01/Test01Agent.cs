@@ -12,6 +12,7 @@ public class Test01Agent : Agent
     public float speed = 3f;
     public float turnSpeed = 5f;
     Rigidbody rb;
+    Rigidbody ballrb;
     RayPerception rp;
     Bounds bound;
 
@@ -25,6 +26,7 @@ public class Test01Agent : Agent
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        ballrb = Ball.GetComponent<Rigidbody>();
         rp = GetComponent<RayPerception>();
         bound = inputBound.bounds;
         mat = Set.GetComponent<Renderer>().material;
@@ -38,9 +40,11 @@ public class Test01Agent : Agent
         transform.Rotate(new Vector3(0, Random.Range(-180, 180), 0));
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
+        ballrb.velocity = Vector3.zero;
+        ballrb.angularVelocity = Vector3.zero;
     }
 
-    bool checkBounds(Transform t)
+    bool isOutOfBounds(Transform t)
     {
         if(bound.Contains(t.position))
             return true;
@@ -50,6 +54,12 @@ public class Test01Agent : Agent
 
     public override void CollectObservations()
     {
+        AddVectorObs(Ball.position.x - transform.position.x);
+        AddVectorObs(Ball.position.z - transform.position.z);
+
+        AddVectorObs(bound.extents.x - transform.position.x);
+        AddVectorObs(bound.extents.z - transform.position.z);
+
         AddVectorObs(transform.position.x);
         AddVectorObs(transform.position.z);
         AddVectorObs(transform.eulerAngles.y);
@@ -58,44 +68,45 @@ public class Test01Agent : Agent
         AddVectorObs(Ball.transform.position.y);
         AddVectorObs(Ball.transform.position.z);
 
-        AddVectorObs(rb.velocity.magnitude);
-        AddVectorObs(rb.angularVelocity.magnitude);
+        AddVectorObs(rb.velocity.x);
+        AddVectorObs(rb.velocity.z);
         AddVectorObs(currentDistance);
 
-        float rayDistance = 5f;
-        float[] rayAngles = { 90f };
-        string[] detectableObjects = { "ball" };
+        var rayDistance = 12f;
+        float[] rayAngles = { 0f, 45f, 90f, 135f, 180f, 225f, 280f };
+        var detectableObjects = new[] { "ball" };
         AddVectorObs(rp.Perceive(rayDistance, rayAngles, detectableObjects, 0f, 0f));
+        AddVectorObs(rp.Perceive(rayDistance, rayAngles, detectableObjects, 1.5f, 0f));
     }
 
     public override void AgentAction(float[] vectorAction, string textAction)
     {
         currentDistance = Vector3.Distance(transform.position, Ball.transform.position);
 
-        if (!checkBounds(Ball))
+        if (!isOutOfBounds(Ball))
         {
-            AddReward(10f);
+            AddReward(1f);
             StartCoroutine(Success(Color.green));
             Done();
         }
 
-        if(!checkBounds(transform))
+        if(!isOutOfBounds(transform))
         {
             AddReward(-1f);
             StartCoroutine(Success(Color.red));
             AgentReset();
         }
 
-        if(currentDistance < previousDistance)
-        {
-            AddReward(0.1f);
-        }
-        else
-        {
-            AddReward(-0.2f);
-        }
+        //if(currentDistance < previousDistance)
+        //{
+        //    AddReward(0.1f);
+        //}
+        //else
+        //{
+        //    AddReward(-0.2f);
+        //}
 
-        AddReward(-0.001f);
+        AddReward(-1f / agentParameters.maxStep);
 
         rotation += vectorAction[0] * turnSpeed;
         Vector3 newHeading = new Vector3(transform.eulerAngles.x, rotation, transform.eulerAngles.z);
@@ -110,7 +121,7 @@ public class Test01Agent : Agent
     {
         if(collision.gameObject == Ball.gameObject)
         {
-            AddReward(1f);
+            AddReward(0.1f);
         }
     }
 
