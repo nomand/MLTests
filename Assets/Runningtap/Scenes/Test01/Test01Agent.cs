@@ -44,7 +44,7 @@ public class Test01Agent : Agent
         ballrb.angularVelocity = Vector3.zero;
     }
 
-    bool isOutOfBounds(Transform t)
+    bool BoundsContain(Transform t)
     {
         if(bound.Contains(t.position))
             return true;
@@ -54,58 +54,33 @@ public class Test01Agent : Agent
 
     public override void CollectObservations()
     {
-        AddVectorObs(Ball.position.x - transform.position.x);
-        AddVectorObs(Ball.position.z - transform.position.z);
-
-        AddVectorObs(bound.extents.x - transform.position.x);
-        AddVectorObs(bound.extents.z - transform.position.z);
-
-        AddVectorObs(transform.position.x);
-        AddVectorObs(transform.position.z);
-        AddVectorObs(transform.eulerAngles.y);
-
-        AddVectorObs(Ball.transform.position.x);
-        AddVectorObs(Ball.transform.position.y);
-        AddVectorObs(Ball.transform.position.z);
-
-        AddVectorObs(rb.velocity.x);
-        AddVectorObs(rb.velocity.z);
-        AddVectorObs(currentDistance);
-
-        var rayDistance = 12f;
-        float[] rayAngles = { 0f, 45f, 90f, 135f, 180f, 225f, 280f };
-        var detectableObjects = new[] { "ball" };
+        var rayDistance = 10f;
+        float[] rayAngles = { 90f };
+        var detectableObjects = new[] { "ball", "wall" };
         AddVectorObs(rp.Perceive(rayDistance, rayAngles, detectableObjects, 0f, 0f));
-        AddVectorObs(rp.Perceive(rayDistance, rayAngles, detectableObjects, 1.5f, 0f));
     }
 
     public override void AgentAction(float[] vectorAction, string textAction)
     {
         currentDistance = Vector3.Distance(transform.position, Ball.transform.position);
 
-        if (!isOutOfBounds(Ball))
+        //reward if you get the ball out of bounds
+        if (!BoundsContain(Ball))
         {
             AddReward(1f);
             StartCoroutine(Success(Color.green));
             Done();
         }
 
-        if(!isOutOfBounds(transform))
+        //penalty if you go out of bounds
+        if(!BoundsContain(transform))
         {
             AddReward(-1f);
             StartCoroutine(Success(Color.red));
             AgentReset();
         }
 
-        //if(currentDistance < previousDistance)
-        //{
-        //    AddReward(0.1f);
-        //}
-        //else
-        //{
-        //    AddReward(-0.2f);
-        //}
-
+        //hurry up
         AddReward(-1f / agentParameters.maxStep);
 
         rotation += vectorAction[0] * turnSpeed;
@@ -121,7 +96,7 @@ public class Test01Agent : Agent
     {
         if(collision.gameObject == Ball.gameObject)
         {
-            AddReward(0.1f);
+            AddReward(2f);
         }
     }
 
