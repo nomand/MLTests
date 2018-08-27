@@ -33,8 +33,8 @@ public class Test01Agent2 : Agent
 
     public override void AgentReset()
     {
-        transform.position = new Vector3(Set.transform.position.x - Random.Range(-9.5f, 9.5f), 0.5f, Set.transform.position.z - Random.Range(-9.5f, 9.5f));
-        Ball.transform.position = new Vector3(Set.transform.position.x - Random.Range(-9.5f, 9.5f), 0.5f, Set.transform.position.z - Random.Range(-9.5f, 9.5f));
+        transform.position = new Vector3(Set.transform.position.x - Random.Range(-bound.extents.x, bound.extents.x), 0.5f, Set.transform.position.z - Random.Range(-bound.extents.z, bound.extents.z));
+        Ball.transform.position = new Vector3(Set.transform.position.x - Random.Range(-bound.extents.x, bound.extents.x), 0.5f, Set.transform.position.z - Random.Range(-bound.extents.z, bound.extents.z));
 
         transform.Rotate(new Vector3(0, Random.Range(-180, 180), 0));
         rb.velocity = Vector3.zero;
@@ -54,7 +54,7 @@ public class Test01Agent2 : Agent
     public override void CollectObservations()
     {
         var rayDistance = 10f;
-        float[] rayAngles = { 90f };
+        float[] rayAngles = { 0f, 90f, 180f, 270f };
         var detectableObjects = new[] { "ball", "wall" };
         AddVectorObs(rp.Perceive(rayDistance, rayAngles, detectableObjects, 0f, 0f));
     }
@@ -65,7 +65,7 @@ public class Test01Agent2 : Agent
         if (!BoundsContain(Ball))
         {
             AddReward(1f);
-            StartCoroutine(Success(Color.green));
+            StartCoroutine(VisualizeResult(Color.green));
             Done();
         }
 
@@ -73,7 +73,7 @@ public class Test01Agent2 : Agent
         if(!BoundsContain(transform))
         {
             AddReward(-1f);
-            StartCoroutine(Success(Color.red));
+            StartCoroutine(VisualizeResult(Color.red));
             AgentReset();
         }
 
@@ -95,11 +95,11 @@ public class Test01Agent2 : Agent
     {
         if(collision.gameObject == Ball.gameObject)
         {
-            AddReward(collision.relativeVelocity.magnitude);
+            AddReward(collision.relativeVelocity.magnitude * 0.1f);
         }
     }
 
-    IEnumerator Success(Color c)
+    IEnumerator VisualizeResult(Color c)
     {
         mat.color = c;
         yield return new WaitForSeconds(1);
