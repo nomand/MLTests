@@ -53,10 +53,10 @@ public class Test01Agent2 : Agent
 
     public override void CollectObservations()
     {
-        var rayDistance = 10f;
-        float[] rayAngles = { 0f, 90f, 180f, 270f };
+        float[] rayAngles = { 90f };
         var detectableObjects = new[] { "ball", "wall" };
-        AddVectorObs(rp.Perceive(rayDistance, rayAngles, detectableObjects, 0f, 0f));
+        AddVectorObs(rp.Perceive(10f, rayAngles, detectableObjects, 0f, 0f));
+        AddVectorObs(rp.Perceive(2f, new[] { 0f, 180f, 270f }, new[] {"wall"}, 0f, 0f));
     }
 
     public override void AgentAction(float[] vectorAction, string textAction)
@@ -65,7 +65,7 @@ public class Test01Agent2 : Agent
         if (!BoundsContain(Ball))
         {
             AddReward(1f);
-            StartCoroutine(VisualizeResult(Color.green));
+            StartCoroutine(Success(Color.green));
             Done();
         }
 
@@ -73,7 +73,7 @@ public class Test01Agent2 : Agent
         if(!BoundsContain(transform))
         {
             AddReward(-1f);
-            StartCoroutine(VisualizeResult(Color.red));
+            StartCoroutine(Success(Color.red));
             AgentReset();
         }
 
@@ -99,7 +99,7 @@ public class Test01Agent2 : Agent
         }
     }
 
-    IEnumerator VisualizeResult(Color c)
+    IEnumerator Success(Color c)
     {
         mat.color = c;
         yield return new WaitForSeconds(1);
