@@ -19,7 +19,6 @@ public class Test01Agent : Agent
     float forward;
     float rotation;
     float currentDistance;
-    float previousDistance;
 
     Material mat;
 
@@ -88,8 +87,6 @@ public class Test01Agent : Agent
 
         rb.MoveRotation(Quaternion.Euler(newHeading));
         rb.AddForce(transform.forward * vectorAction[1] * speed, ForceMode.VelocityChange);
-
-        previousDistance = currentDistance;
     }
 
     private void OnCollisionEnter(Collision collision)
