@@ -18,7 +18,6 @@ public class Test01Agent3 : Agent
 
     float forward;
     float rotation;
-    float currentDistance;
 
     Material mat;
 
@@ -61,8 +60,6 @@ public class Test01Agent3 : Agent
 
     public override void AgentAction(float[] vectorAction, string textAction)
     {
-        currentDistance = Vector3.Distance(transform.position, Ball.transform.position);
-
         //reward if you get the ball out of bounds
         if (!BoundsContain(Ball))
         {

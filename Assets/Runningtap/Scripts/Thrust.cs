@@ -26,7 +26,7 @@ public class Thrust : MonoBehaviour
 	
 	void Update ()
     {
-        //print(Mathf.Abs(Quaternion.Angle(transform.rotation, Quaternion.Euler(0, 1, 0))));
+        Debug.DrawRay(transform.position, Vector3.up * 50f, Color.red);
     }
 
     public void ThrustAUX(float[] thrust)

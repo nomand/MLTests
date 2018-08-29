@@ -8,7 +8,6 @@ public class FalconAgent03 : Agent
     public float AngleGoal = 1.1f;
     public float AngleThreshold = 30;
     Thrust falcon;
-    Transform body;
     Rigidbody rb;
     Vector3 position;
 
@@ -17,11 +16,6 @@ public class FalconAgent03 : Agent
 
     float currentAngularVelocity;
     float previousAngularVelocity;
-
-    float thrust0;
-    float thrust1;
-    float thrust2;
-    float thrust3;
 
     Material mat;
 
@@ -55,9 +49,10 @@ public class FalconAgent03 : Agent
         AddVectorObs(rb.angularVelocity.x);
         AddVectorObs(rb.angularVelocity.z);
 
-        //AddVectorObs(Quaternion.Angle(transform.rotation, Quaternion.Euler(0, 1, 0)));
-        AddVectorObs(Vector3.Angle(new Vector3( transform.eulerAngles.x, 0f, 0f), Vector3.up));
-        AddVectorObs(Vector3.Angle(new Vector3( 0f, 0f, transform.eulerAngles.z), Vector3.up));
+        AddVectorObs(Vector3.Angle(Vector3.up, transform.forward));
+        AddVectorObs(Vector3.Angle(Vector3.up, transform.right));
+
+        //print(Vector3.Angle(new Vector3(0f, 0f, transform.eulerAngles.z), Vector3.up));
     }
 
     public override void AgentAction(float[] vectorAction, string textAction)
@@ -104,11 +99,6 @@ public class FalconAgent03 : Agent
 
         float[] control = { vectorAction[0], vectorAction[1], vectorAction[2], vectorAction[3] };
         falcon.ThrustAUX(control);
-
-        thrust0 = vectorAction[0];
-        thrust1 = vectorAction[1];
-        thrust2 = vectorAction[2];
-        thrust3 = vectorAction[3];
 
         previousAngleDiff = currentAngleDiff;
         previousAngularVelocity = currentAngularVelocity;
