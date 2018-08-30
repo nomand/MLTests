@@ -15,9 +15,6 @@ public class falconAgent2D_2 : Agent {
     float previousAngleDiff;
     float currentAngleDiff;
 
-    float currentAngularVelocity;
-    float previousAngularVelocity;
-
     bool centering;
     float time;
 
@@ -42,37 +39,42 @@ public class falconAgent2D_2 : Agent {
 
     public override void CollectObservations()
     {
-        AddVectorObs(transform.eulerAngles.z);
+        AddVectorObs(transform.rotation.eulerAngles.z / 180f - 1f);
+        AddVectorObs(currentAngleDiff);
     }
 
     public override void AgentAction(float[] vectorAction, string textAction)
     {
-        currentAngularVelocity = Mathf.Abs(rb.angularVelocity.magnitude);
         currentAngleDiff = Vector3.Angle(transform.up, Vector3.up);
-
         if(currentAngleDiff < AngleGoal)
         {
             AddReward(0.1f);
             time += Time.deltaTime;
-            if(time > 3)
+
+            if (time > 5)
             {
                 AddReward(1f);
+                StartCoroutine(Success(Color.green));
                 Done();
             }
-            //StartCoroutine(WaitForSuccess());
+        }
+        else
+        {
+            AddReward(-1f / agentParameters.maxStep);
+            time = 0;
         }
 
-        //punish if angle increases
-        if (currentAngleDiff < previousAngleDiff)
-        {
-            AddReward(0.01f);
-        }
+        //////reward if angle decreases
+        //if (currentAngleDiff < previousAngleDiff)
+        //{
+        //    AddReward(0.01f);
+        //}
 
-        //punish if angle increases
-        if (currentAngleDiff > previousAngleDiff)
-        {
-            AddReward(-0.05f);
-        }
+        ////punish if angle increases
+        //if (currentAngleDiff > previousAngleDiff)
+        //{
+        //    AddReward(-0.01f);
+        //}
 
         //fail being upside down
         if (Quaternion.Angle(transform.rotation, Quaternion.Euler(0, 1, 0)) > 90f)
@@ -87,32 +89,7 @@ public class falconAgent2D_2 : Agent {
 
         falcon.ThrustAUX(vectorAction[0]);
         previousAngleDiff = currentAngleDiff;
-        previousAngularVelocity = currentAngularVelocity;
     }
-
-    //IEnumerator WaitForSuccess()
-    //{
-    //    centering = true;
-    //    mat.color = Color.yellow;
-    //    float time = 0f;
-
-    //    while (currentAngleDiff < AngleGoal && centering)
-    //    {
-    //        time += Time.deltaTime;
-    //        if(time > 3)
-    //        {
-    //            StartCoroutine(Success(Color.green));
-    //            Done();
-    //            centering = false;
-    //            yield break;
-    //        }
-    //        yield return new WaitForEndOfFrame();
-    //    }
-    //    AddReward(-0.1f);
-    //    StartCoroutine(Success(Color.red));
-    //    centering = false;
-    //    yield return null;
-    //}
 
     IEnumerator Success(Color c)
     {
