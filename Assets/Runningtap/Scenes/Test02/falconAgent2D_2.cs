@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using MLAgents;
 
-public class falconAgent2D : Agent {
+public class falconAgent2D_2 : Agent {
 
     public float AngleGoal = 1.1f;
     public float AngleThreshold = 30;
@@ -17,6 +17,9 @@ public class falconAgent2D : Agent {
 
     float currentAngularVelocity;
     float previousAngularVelocity;
+
+    bool centering;
+    float time;
 
     void Start()
     {
@@ -49,9 +52,14 @@ public class falconAgent2D : Agent {
 
         if(currentAngleDiff < AngleGoal)
         {
-            AddReward(1);
-            StartCoroutine(Success(Color.green));
-            Done();
+            AddReward(0.1f);
+            time += Time.deltaTime;
+            if(time > 3)
+            {
+                AddReward(1f);
+                Done();
+            }
+            //StartCoroutine(WaitForSuccess());
         }
 
         //punish if angle increases
@@ -81,6 +89,30 @@ public class falconAgent2D : Agent {
         previousAngleDiff = currentAngleDiff;
         previousAngularVelocity = currentAngularVelocity;
     }
+
+    //IEnumerator WaitForSuccess()
+    //{
+    //    centering = true;
+    //    mat.color = Color.yellow;
+    //    float time = 0f;
+
+    //    while (currentAngleDiff < AngleGoal && centering)
+    //    {
+    //        time += Time.deltaTime;
+    //        if(time > 3)
+    //        {
+    //            StartCoroutine(Success(Color.green));
+    //            Done();
+    //            centering = false;
+    //            yield break;
+    //        }
+    //        yield return new WaitForEndOfFrame();
+    //    }
+    //    AddReward(-0.1f);
+    //    StartCoroutine(Success(Color.red));
+    //    centering = false;
+    //    yield return null;
+    //}
 
     IEnumerator Success(Color c)
     {
