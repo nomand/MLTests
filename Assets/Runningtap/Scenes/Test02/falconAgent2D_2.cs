@@ -39,22 +39,23 @@ public class falconAgent2D_2 : Agent {
 
     public override void CollectObservations()
     {
-        AddVectorObs(transform.rotation.eulerAngles.z / 180f - 1f);
-        AddVectorObs(currentAngleDiff);
+        AddVectorObs(transform.rotation.eulerAngles.z / 180f - 1f); //normalized angle
+        AddVectorObs(currentAngleDiff/90f); //normalized angle difference
     }
 
     public override void AgentAction(float[] vectorAction, string textAction)
     {
         currentAngleDiff = Vector3.Angle(transform.up, Vector3.up);
+
         if(currentAngleDiff < AngleGoal)
         {
-            AddReward(0.1f);
             time += Time.deltaTime;
+            mat.color = Color.yellow;
 
-            if (time > 5)
+            if (time > 3)
             {
-                AddReward(1f);
-                StartCoroutine(Success(Color.green));
+                AddReward(0.5f);
+                StartCoroutine(FlashColor(Color.green));
                 Done();
             }
         }
@@ -62,9 +63,10 @@ public class falconAgent2D_2 : Agent {
         {
             AddReward(-1f / agentParameters.maxStep);
             time = 0;
+            StartCoroutine(FlashColor(Color.red, 0.5f));
         }
 
-        //////reward if angle decreases
+        ////reward if angle decreases
         //if (currentAngleDiff < previousAngleDiff)
         //{
         //    AddReward(0.01f);
@@ -73,28 +75,28 @@ public class falconAgent2D_2 : Agent {
         ////punish if angle increases
         //if (currentAngleDiff > previousAngleDiff)
         //{
-        //    AddReward(-0.01f);
+        //    AddReward(-0.02f);
         //}
 
         //fail being upside down
         if (Quaternion.Angle(transform.rotation, Quaternion.Euler(0, 1, 0)) > 90f)
         {
             AddReward(-1f);
-            StartCoroutine(Success(Color.red));
+            StartCoroutine(FlashColor(Color.red));
             AgentReset();
         }
 
         //punish over time
-        AddReward(-1f / agentParameters.maxStep);
+        //AddReward(-1f / agentParameters.maxStep);
 
         falcon.ThrustAUX(vectorAction[0]);
         previousAngleDiff = currentAngleDiff;
     }
 
-    IEnumerator Success(Color c)
+    IEnumerator FlashColor(Color c, float t = 1)
     {
         mat.color = c;
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(t);
         mat.color = Color.grey;
         yield return null;
     }
