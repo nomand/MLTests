@@ -41,6 +41,7 @@ public class falconAgent2D_2 : Agent {
     {
         AddVectorObs(transform.rotation.eulerAngles.z / 180f - 1f); //normalized angle
         AddVectorObs(currentAngleDiff/90f); //normalized angle difference
+        AddVectorObs(rb.angularVelocity.z);
     }
 
     public override void AgentAction(float[] vectorAction, string textAction)
@@ -72,11 +73,11 @@ public class falconAgent2D_2 : Agent {
         //    AddReward(0.01f);
         //}
 
-        ////punish if angle increases
-        //if (currentAngleDiff > previousAngleDiff)
-        //{
-        //    AddReward(-0.02f);
-        //}
+        //punish if angle increases
+        if (currentAngleDiff > previousAngleDiff)
+        {
+            AddReward(-0.02f);
+        }
 
         //fail being upside down
         if (Quaternion.Angle(transform.rotation, Quaternion.Euler(0, 1, 0)) > 90f)
