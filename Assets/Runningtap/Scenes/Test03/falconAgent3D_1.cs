@@ -60,7 +60,7 @@ public class falconAgent3D_1 : Agent {
 
             if (time > 5f)
             {
-                AddReward(0.5f);
+                AddReward(1f);
                 time = 0;
                 Done();
                 centering = false;
@@ -77,14 +77,14 @@ public class falconAgent3D_1 : Agent {
         AddReward(-1f / agentParameters.maxStep);
 
         //reward if angle decreases
-        if (Mathf.Abs(x) < Mathf.Abs(rotation.x) || Mathf.Abs(z) < Mathf.Abs(rotation.z))
-        {
-            AddReward(0.001f);
-        }
-        else
-        {
-            AddReward(-0.002f);
-        }
+        //if (Mathf.Abs(x) < Mathf.Abs(rotation.x) || Mathf.Abs(z) < Mathf.Abs(rotation.z))
+        //{
+        //    AddReward(0.001f);
+        //}
+        //else
+        //{
+        //    AddReward(-0.002f);
+        //}
 
         //fail being upside down
         if (Quaternion.Angle(transform.rotation, Quaternion.Euler(0, 1, 0)) > 90f)
