@@ -12,7 +12,7 @@ public class falconAgent3D_1 : Agent {
     Material mat;
     Vector3 position;
 
-    Vector3 rotation;
+    Vector3 PreviousRotation;
 
     bool centering = false;
     float time;
@@ -39,8 +39,8 @@ public class falconAgent3D_1 : Agent {
 
     public override void CollectObservations()
     {
-        AddVectorObs(transform.rotation.eulerAngles.x / 180f - 1f); //normalized angle
-        AddVectorObs(transform.rotation.eulerAngles.z / 180f - 1f); //normalized angle
+        AddVectorObs((Vector3.Angle(transform.right, Vector3.up) - 90) / 180f - 1f); //normalized angle
+        AddVectorObs((Vector3.Angle(transform.forward, Vector3.up) - 90) / 180f - 1f); //normalized angle
 
         AddVectorObs(rb.angularVelocity.x);
         AddVectorObs(rb.angularVelocity.z);
@@ -48,10 +48,10 @@ public class falconAgent3D_1 : Agent {
 
     public override void AgentAction(float[] vectorAction, string textAction)
     {
-        float x = transform.rotation.eulerAngles.x;
-        float z = transform.rotation.eulerAngles.z;
+        float z = Mathf.Abs(Vector3.Angle(transform.right, Vector3.up) - 90);
+        float x = Mathf.Abs(Vector3.Angle(transform.forward, Vector3.up) - 90);
 
-        if (x < AngleGoal && z < AngleGoal)
+        if (z < AngleGoal && x < AngleGoal)
         {
             AddReward(0.0001f);
             time += Time.deltaTime;
@@ -67,7 +67,8 @@ public class falconAgent3D_1 : Agent {
                 StartCoroutine(FlashColor(Color.green));
             }
         }
-        else if (x > AngleGoal && centering || z > AngleGoal && centering)
+
+        else if (z > AngleGoal && centering)
         {
             time = 0;
             centering = false;
@@ -77,14 +78,15 @@ public class falconAgent3D_1 : Agent {
         AddReward(-1f / agentParameters.maxStep);
 
         //reward if angle decreases
-        //if (Mathf.Abs(x) < Mathf.Abs(rotation.x) || Mathf.Abs(z) < Mathf.Abs(rotation.z))
-        //{
-        //    AddReward(0.001f);
-        //}
-        //else
-        //{
-        //    AddReward(-0.002f);
-        //}
+        if (z < PreviousRotation.z)
+            AddReward(0.001f);
+        else
+            AddReward(-0.002f);
+
+        if (x < PreviousRotation.x)
+            AddReward(0.001f);
+        else
+            AddReward(-0.002f);
 
         //fail being upside down
         if (Quaternion.Angle(transform.rotation, Quaternion.Euler(0, 1, 0)) > 90f)
@@ -95,7 +97,7 @@ public class falconAgent3D_1 : Agent {
         }
 
         doThrust(vectorAction);
-        rotation = transform.rotation.eulerAngles;
+        PreviousRotation = new Vector3(x, 0f, z);
     }
 
     void doThrust(float[] act)
